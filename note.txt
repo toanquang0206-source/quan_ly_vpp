@@ -1,0 +1,5 @@
+cây thư mục theo mô hình MVC
+
+
+# cách kết nối python đến mysql
+1.import thư viện mysql.connect
