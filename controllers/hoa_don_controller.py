@@ -177,7 +177,7 @@ class HoaDonController:
             return False, "Vui lòng nhập lý do hủy hóa đơn.", None
         ly_do = ly_do[:200]
         nguoi_id = Session.get_user()["id"]
-
+        bay_gio = datetime.now()
         try:
             with transaction() as conn:
                 hd = HoaDon.khoa(conn, hoa_don_id)
@@ -195,7 +195,7 @@ class HoaDonController:
                     SanPham.cap_nhat_sau_nhap(conn, sp["id"], d["so_luong"], gia_von_moi)
                     TheKho.ghi(conn, sp["id"], "huy_hoa_don", d["so_luong"],
                                sp["ton_kho"] + d["so_luong"], hoa_don_id, nguoi_id, hd["ma_hoa_don"])
-                HoaDon.doi_trang_thai(conn, hoa_don_id, "da_huy")
+                HoaDon.danh_dau_huy(conn, hoa_don_id, bay_gio)
                 NhatKy.ghi(conn, nguoi_id, "HUY_HOA_DON", "hoa_don", hoa_don_id,
                            f"{hd['ma_hoa_don']}: {ly_do}")
         except LoiNghiepVu as loi:

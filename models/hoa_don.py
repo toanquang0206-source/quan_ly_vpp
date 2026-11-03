@@ -133,9 +133,16 @@ class HoaDon:
     def doi_trang_thai(conn, hoa_don_id, trang_thai):
         cur = conn.cursor()
         cur.execute("UPDATE hoa_don SET trang_thai = %s WHERE id = %s", (trang_thai, hoa_don_id))
-
+    @staticmethod
+    def danh_dau_huy(conn, hoa_don_id, ngay_huy):
+        """Đánh dấu đã hủy VÀ ghi ngày hủy: khoản hủy được báo cáo vào đúng ngày này."""
+        cur = conn.cursor()
+        cur.execute("UPDATE hoa_don SET trang_thai = 'da_huy', ngay_huy = %s WHERE id = %s",
+                    (ngay_huy, hoa_don_id))
     @staticmethod
     def da_co_tra_hang(conn, hoa_don_id):
         cur = conn.cursor()
         cur.execute("SELECT COUNT(*) FROM phieu_tra_hang WHERE hoa_don_id = %s", (hoa_don_id,))
         return cur.fetchone()[0] > 0
+
+    

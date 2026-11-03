@@ -13,3 +13,6 @@ def dinh_dang_ngay(ngay):
 def dinh_dang_gio(thoi_diem):
     """datetime -> '26/10/2026 14:05'"""
     return thoi_diem.strftime("%d/%m/%Y %H:%M") if thoi_diem else ""
+def dinh_dang_so(so):
+    """1234567 -> '1.234.567' (dùng cho trục biểu đồ, không kèm đơn vị)."""
+    return f"{int(so):,}".replace(",", ".")

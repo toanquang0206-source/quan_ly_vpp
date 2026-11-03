@@ -58,7 +58,17 @@ def ap_dung_theme(root):
     s.configure("TieuDe.TLabel", font=(f, 15, "bold"))
     s.configure("Tong.TLabel", font=(f, 12, "bold"), foreground=MAU["chinh_dam"])
     s.configure("TongLon.TLabel", font=(f, 16, "bold"), foreground=MAU["chinh_dam"])
-
+        # ----- Thẻ số liệu (báo cáo) và các tab -----
+    s.configure("The.TFrame", background=MAU["the"], relief="solid", borderwidth=1,
+                bordercolor=MAU["vien"])
+    s.configure("The.TLabel", background=MAU["the"], foreground=MAU["chu_phu"])
+    s.configure("TheSo.TLabel", background=MAU["the"], foreground=MAU["chu"],
+                font=(f, 16, "bold"))
+    s.configure("TNotebook", background=MAU["nen"], borderwidth=0)
+    s.configure("TNotebook.Tab", padding=(20, 9), background="#E2E8F0", foreground=MAU["chu"])
+    s.map("TNotebook.Tab", background=[("selected", MAU["the"])],
+          foreground=[("selected", MAU["chinh_dam"])])
+    
     # ----- Nút -----
     s.configure("TButton", padding=(14, 7), relief="flat", borderwidth=0,
                 background="#E2E8F0", foreground=MAU["chu"])

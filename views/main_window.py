@@ -8,6 +8,7 @@ from views.placeholder_view import PlaceholderView
 from views.san_pham_view import SanPhamView
 from views.ban_hang_view import BanHangView
 from views.hoa_don_view import HoaDonView
+from views.bao_cao_view import BaoCaoView
 
 TAT_CA = (ROLE_ADMIN, ROLE_THU_KHO, ROLE_NHAN_VIEN)
 
@@ -25,7 +26,8 @@ MENU = [
 # Màn hình thật làm xong đến đâu thì đăng ký vào đây.
 # Mục nào chưa đăng ký sẽ dùng PlaceholderView.
 MAN_HINH_THAT = {"san_pham": SanPhamView, "ban_hang": BanHangView,
-                 "kho": NhapKhoView, "hoa_don": HoaDonView}
+                 "kho": NhapKhoView, "hoa_don": HoaDonView,
+                 "bao_cao": BaoCaoView}
 
 
 class MainWindow(ttk.Frame):
