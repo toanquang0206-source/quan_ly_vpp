@@ -10,6 +10,9 @@ from controllers.bao_cao_controller import BaoCaoController
 from utils.formatters import dinh_dang_ngay, dinh_dang_so, dinh_dang_tien
 from views.chung import goi_controller
 from views.theme import MAU, to_mau_xen_ke
+from utils import pdf_export
+from utils.session import Session
+from views.chung import goi_controller, xuat_pdf
 
 KHOANG_NHANH = ["7 ngày qua", "30 ngày qua", "Tháng này", "Tháng trước", "Năm nay", "Tùy chọn"]
 KIEU_HIEN_THI = {"Theo ngày": "ngay", "Theo tháng": "thang", "Theo năm": "nam"}
@@ -92,7 +95,7 @@ class BaoCaoView(ttk.Frame):
         self.var_kieu = tk.StringVar(value="Theo ngày")
         self._xay_dung()
         self._ap_dung_nhanh(tu_xem=False)
-
+        self._du_lieu = {}          # dữ liệu báo cáo đang hiển thị, dùng lại khi xuất PDF
     # ---------- dựng giao diện ----------
     def _xay_dung(self):
         self.grid_columnconfigure(0, weight=1)
@@ -120,7 +123,7 @@ class BaoCaoView(ttk.Frame):
         cbo2.pack(side="left", padx=(6, 10))
         cbo2.bind("<<ComboboxSelected>>", lambda e: self._xem())
         ttk.Button(loc, text="Xem báo cáo", command=self._xem, style="Accent.TButton").pack(side="left")
-
+        ttk.Button(loc, text="Xuất PDF", command=self._xuat_pdf).pack(side="left", padx=(8, 0))
         self.lbl_thong_bao = ttk.Label(self, text="", foreground=MAU["nguy_hiem"])
         self.lbl_thong_bao.grid(row=1, column=0, sticky="w", pady=(4, 4))
 
@@ -249,18 +252,40 @@ class BaoCaoView(ttk.Frame):
             self.lbl_thong_bao.config(text=thong_diep)
             return
         self.lbl_thong_bao.config(text="")
+        self._du_lieu["doanh_thu"] = du_lieu
         self._ve_doanh_thu(du_lieu)
 
         kq = self._goi(BaoCaoController.theo_danh_muc, tu, den)
         if kq and kq[0]:
+            self._du_lieu["danh_muc"] = kq[2]
             self._ve_danh_muc(kq[2])
         kq = self._goi(BaoCaoController.theo_san_pham, tu, den, 10)
         if kq and kq[0]:
+            self._du_lieu["san_pham"] = kq[2]
             self._ve_san_pham(kq[2])
         kq = self._goi(BaoCaoController.ton_kho)
         if kq and kq[0]:
+            self._du_lieu["ton_kho"] = kq[2]
             self._ve_ton_kho(kq[2])
 
+    def _xuat_pdf(self):
+        """Đang ở tab Tồn kho thì xuất báo cáo tồn kho, ngược lại xuất báo cáo doanh thu."""
+        nguoi_in = Session.get_user()["ho_ten"]
+        if self.nb.index(self.nb.select()) == 3:
+            dl = self._du_lieu.get("ton_kho")
+            if dl is None:
+                self.lbl_thong_bao.config(text="Chưa có dữ liệu để xuất.")
+                return
+            xuat_pdf(self, f"bao_cao_ton_kho_{date.today():%Y%m%d}.pdf",
+                     lambda duong_dan: pdf_export.xuat_bao_cao_ton_kho(duong_dan, dl, nguoi_in))
+            return
+        dt, dm, sp = (self._du_lieu.get(k) for k in ("doanh_thu", "danh_muc", "san_pham"))
+        if not (dt and dm and sp):
+            self.lbl_thong_bao.config(text="Chưa có dữ liệu để xuất. Hãy bấm Xem báo cáo trước.")
+            return
+        ten = f"bao_cao_doanh_thu_{dt['tu']:%Y%m%d}_{dt['den']:%Y%m%d}.pdf"
+        xuat_pdf(self, ten, lambda duong_dan: pdf_export.xuat_bao_cao_doanh_thu(
+            duong_dan, dt, dm, sp, nguoi_in))
     # ---------- vẽ từng tab ----------
     def _ve_doanh_thu(self, dl):
         kieu, dong, tong = dl["kieu"], dl["dong"], dl["tong"]

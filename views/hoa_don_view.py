@@ -8,6 +8,8 @@ from utils.session import ROLE_ADMIN, Session
 from views.chung import goi_controller
 from views.theme import MAU, to_mau_xen_ke
 from views.tra_hang_form import TraHangForm
+from utils import pdf_export
+from views.chung import goi_controller, xuat_pdf
 
 SO_DONG = 6
 THOI_GIAN_THONG_BAO_MS = 6000
@@ -114,6 +116,8 @@ class HoaDonView(ttk.Frame):
         self.btn_tra = ttk.Button(nut, text="Trả hàng...", command=self._tra_hang,
                                   style="Accent.TButton", state="disabled")
         self.btn_tra.pack(side="left")
+        self.btn_in = ttk.Button(nut, text="In hóa đơn (PDF)", command=self._in_pdf, state="disabled")
+        self.btn_in.pack(side="left", padx=(8, 0))
         if Session.has_role(ROLE_ADMIN):          # chỉ Admin mới có nút hủy hóa đơn
             self.btn_huy = ttk.Button(nut, text="Hủy hóa đơn", command=self._huy,
                                       style="Danger.TButton", state="disabled")
@@ -212,6 +216,7 @@ class HoaDonView(ttk.Frame):
         for lbl in (self.lbl_thong_tin, self.lbl_han, self.lbl_ly_do):
             lbl.config(text="")
         self.tree_dong.delete(*self.tree_dong.get_children())
+        self.btn_in.config(state="disabled")
         self.btn_tra.config(state="disabled")
         if self.btn_huy:
             self.btn_huy.config(state="disabled")
@@ -250,6 +255,8 @@ class HoaDonView(ttk.Frame):
                 d["ma_sp"], d["ten_sp"], d["so_luong"], dinh_dang_tien(d["don_gia"]),
                 dinh_dang_tien(d["thanh_tien"]), d["da_tra"] or ""))
         to_mau_xen_ke(self.tree_dong)
+
+        self.btn_in.config(state="normal")
 
         self.btn_tra.config(state="normal" if ct["co_the_tra"] else "disabled")
         if self.btn_huy:
@@ -295,6 +302,11 @@ class HoaDonView(ttk.Frame):
         else:
             self._bao(thong_diep, loi=True)
 
+    def _in_pdf(self):
+        if self._ct is None:
+            return
+        ma = self._ct["hoa_don"]["ma_hoa_don"]
+        xuat_pdf(self, f"{ma}.pdf", lambda duong_dan: pdf_export.xuat_hoa_don(duong_dan, self._ct))
     def _huy_cong_viec(self, event):
         if event.widget is self and self._job_thong_bao is not None:
             self.after_cancel(self._job_thong_bao)
