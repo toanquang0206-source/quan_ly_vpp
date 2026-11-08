@@ -9,6 +9,8 @@ from views.san_pham_view import SanPhamView
 from views.ban_hang_view import BanHangView
 from views.hoa_don_view import HoaDonView
 from views.bao_cao_view import BaoCaoView
+from views.doi_mat_khau_form import DoiMatKhauForm
+from views.nguoi_dung_view import NguoiDungView
 
 TAT_CA = (ROLE_ADMIN, ROLE_THU_KHO, ROLE_NHAN_VIEN)
 
@@ -26,8 +28,8 @@ MENU = [
 # Màn hình thật làm xong đến đâu thì đăng ký vào đây.
 # Mục nào chưa đăng ký sẽ dùng PlaceholderView.
 MAN_HINH_THAT = {"san_pham": SanPhamView, "ban_hang": BanHangView,
-                 "kho": NhapKhoView, "hoa_don": HoaDonView,
-                 "bao_cao": BaoCaoView}
+                 "hoa_don": HoaDonView, "kho": NhapKhoView,
+                 "bao_cao": BaoCaoView, "nguoi_dung": NguoiDungView}
 
 
 class MainWindow(ttk.Frame):
@@ -38,7 +40,8 @@ class MainWindow(ttk.Frame):
         self.nut_menu = {}          # khóa -> nút trên cột menu
         self._xay_dung_giao_dien()
         self.hien(self._menu_cho_phep()[0][0])   # mở mục đầu tiên được phép
-
+        if Session.phai_doi_mat_khau():           # tài khoản mới / vừa được đặt lại mật khẩu: bắt đổi ngay
+            self.after(200, self._bat_buoc_doi_mat_khau)
     def _menu_cho_phep(self):
         return [m for m in MENU if Session.has_role(*m[2])]
 
@@ -63,6 +66,7 @@ class MainWindow(ttk.Frame):
         self.lbl_tieu_de = ttk.Label(thanh_tren, text="", style="HeaderTieuDe.TLabel")
         self.lbl_tieu_de.pack(side="left")
         ttk.Button(thanh_tren, text="Đăng xuất", command=self.on_logout).pack(side="right")
+        ttk.Button(thanh_tren, text="Đổi mật khẩu", command=self._doi_mat_khau).pack(side="right", padx=(0, 8))
         ttk.Label(thanh_tren, text=f"{user['ho_ten']}  ·  {user['vai_tro']}",
                   style="HeaderPhu.TLabel").pack(side="right", padx=16)
 
@@ -75,6 +79,12 @@ class MainWindow(ttk.Frame):
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
+    def _doi_mat_khau(self):
+        DoiMatKhauForm(self, bat_buoc=False, on_logout=self.on_logout)
+
+    def _bat_buoc_doi_mat_khau(self):
+        DoiMatKhauForm(self, bat_buoc=True, on_logout=self.on_logout)
+        
     def hien(self, khoa):
         nhan = next(m[1] for m in MENU if m[0] == khoa)
 
