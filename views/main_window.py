@@ -11,6 +11,7 @@ from views.hoa_don_view import HoaDonView
 from views.bao_cao_view import BaoCaoView
 from views.doi_mat_khau_form import DoiMatKhauForm
 from views.nguoi_dung_view import NguoiDungView
+from views.danh_muc_view import DanhMucView
 
 TAT_CA = (ROLE_ADMIN, ROLE_THU_KHO, ROLE_NHAN_VIEN)
 
@@ -23,13 +24,15 @@ MENU = [
     ("bao_cao",    "Báo cáo",    (ROLE_ADMIN,)),
     ("nguoi_dung", "Người dùng", (ROLE_ADMIN,)),
     ("hoa_don",    "Hóa đơn",    (ROLE_ADMIN, ROLE_NHAN_VIEN)),
+    ("danh_muc",   "Danh mục",   (ROLE_ADMIN, ROLE_THU_KHO)),
 ]
 
 # Màn hình thật làm xong đến đâu thì đăng ký vào đây.
 # Mục nào chưa đăng ký sẽ dùng PlaceholderView.
 MAN_HINH_THAT = {"san_pham": SanPhamView, "ban_hang": BanHangView,
                  "hoa_don": HoaDonView, "kho": NhapKhoView,
-                 "bao_cao": BaoCaoView, "nguoi_dung": NguoiDungView}
+                 "bao_cao": BaoCaoView, "nguoi_dung": NguoiDungView,
+                 "danh_muc": DanhMucView}
 
 
 class MainWindow(ttk.Frame):

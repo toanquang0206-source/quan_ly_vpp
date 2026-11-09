@@ -11,3 +11,5 @@ class TongThayDoi(Exception):
     def __init__(self, tong_moi):
         super().__init__("Tổng tiền đã thay đổi.")
         self.tong_moi = tong_moi
+class RangBuocLienKet(Exception):
+    """Vi phạm khóa ngoại: dữ liệu đang được nơi khác sử dụng (vd: xóa loại sản phẩm còn sản phẩm)."""
