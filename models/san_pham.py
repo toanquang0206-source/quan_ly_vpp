@@ -179,3 +179,14 @@ class SanPham:
             (so_luong, san_pham_id, so_luong),
         )
         return cur.rowcount == 1
+    # ---------- phục vụ màn hình thẻ kho ----------
+    @staticmethod
+    def goi_y_the_kho(tu_khoa, gioi_han=8):
+        """Gợi ý cho Thẻ kho: gồm CẢ sản phẩm đã ngừng kinh doanh (lịch sử vẫn còn nguyên)."""
+        mau = f"%{_escape_like(tu_khoa)}%"
+        return fetch_all(
+            """SELECT id, ma_sp, ten_sp, ton_kho, trang_thai FROM san_pham
+               WHERE ten_sp LIKE %s OR ma_sp LIKE %s
+               ORDER BY (ma_sp = %s) DESC, ten_sp LIMIT %s""",
+            (mau, mau, tu_khoa, gioi_han),
+        )

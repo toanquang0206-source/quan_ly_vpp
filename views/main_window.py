@@ -12,6 +12,10 @@ from views.bao_cao_view import BaoCaoView
 from views.doi_mat_khau_form import DoiMatKhauForm
 from views.nguoi_dung_view import NguoiDungView
 from views.danh_muc_view import DanhMucView
+from controllers.tong_quan_controller import TongQuanController
+from views.canh_bao_form import CanhBaoHetHangForm
+from views.tong_quan_view import TongQuanView
+from views.kho_view import KhoView
 
 TAT_CA = (ROLE_ADMIN, ROLE_THU_KHO, ROLE_NHAN_VIEN)
 
@@ -29,8 +33,8 @@ MENU = [
 
 # Màn hình thật làm xong đến đâu thì đăng ký vào đây.
 # Mục nào chưa đăng ký sẽ dùng PlaceholderView.
-MAN_HINH_THAT = {"san_pham": SanPhamView, "ban_hang": BanHangView,
-                 "hoa_don": HoaDonView, "kho": NhapKhoView,
+MAN_HINH_THAT = {"tong_quan": TongQuanView, "san_pham": SanPhamView, "ban_hang": BanHangView,
+                 "hoa_don": HoaDonView, "kho": KhoView,
                  "bao_cao": BaoCaoView, "nguoi_dung": NguoiDungView,
                  "danh_muc": DanhMucView}
 
@@ -45,6 +49,8 @@ class MainWindow(ttk.Frame):
         self.hien(self._menu_cho_phep()[0][0])   # mở mục đầu tiên được phép
         if Session.phai_doi_mat_khau():           # tài khoản mới / vừa được đặt lại mật khẩu: bắt đổi ngay
             self.after(200, self._bat_buoc_doi_mat_khau)
+        else:
+            self.after(400, self._canh_bao_het_hang)
     def _menu_cho_phep(self):
         return [m for m in MENU if Session.has_role(*m[2])]
 
@@ -87,7 +93,18 @@ class MainWindow(ttk.Frame):
 
     def _bat_buoc_doi_mat_khau(self):
         DoiMatKhauForm(self, bat_buoc=True, on_logout=self.on_logout)
-        
+
+    def _canh_bao_het_hang(self):
+        """Chỉ Admin và Thủ kho (người nhập hàng) mới được nhắc, và chỉ một lần mỗi lần đăng nhập."""
+        if not Session.has_role(ROLE_ADMIN, ROLE_THU_KHO):
+            return
+        try:
+            ok, _, du_lieu = TongQuanController.canh_bao_het_hang()
+        except PermissionDenied:
+            return
+        if ok and du_lieu["tong"] > 0:
+            CanhBaoHetHangForm(self, du_lieu, lambda: self.hien("kho"))
+    
     def hien(self, khoa):
         nhan = next(m[1] for m in MENU if m[0] == khoa)
 
